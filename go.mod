@@ -8,7 +8,10 @@ require (
 )
 
 require (
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
