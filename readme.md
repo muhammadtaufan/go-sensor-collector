@@ -31,7 +31,18 @@ cd go-sensor-collector
 make setup
 ```
 
-4. build and run the service:
+4. db migration:
+
+```sh
+make migrate-up
+```
+
+- create a new migration
+```sh
+make migrate-create name=create_new_table
+```
+
+5. build and run the service:
 
 ```sh
 make run
