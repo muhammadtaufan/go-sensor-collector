@@ -1,0 +1,40 @@
+{
+	"info": {
+		"_postman_id": "0f8ff922-7a93-49a4-95f2-1d1bc23a8d4d",
+		"name": "GoSensorCollector",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25500521"
+	},
+	"item": [
+		{
+			"name": "Get Data By Sensor IDs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3001/v1/api/sensors?id1=X&id2=1",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"v1",
+						"api",
+						"sensors"
+					],
+					"query": [
+						{
+							"key": "id1",
+							"value": "X"
+						},
+						{
+							"key": "id2",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

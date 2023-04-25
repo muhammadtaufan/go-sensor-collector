@@ -37,7 +37,7 @@ func (gd *grpcDelivery) RunGRPCServer(cfg *config.Config) error {
 
 	log.Printf("gRPC server is running on %s", address)
 	if err := grpcServer.Serve(lis); err != nil {
-		return err
+		return fmt.Errorf("grpc failed to serve: %v", err)
 	}
 
 	return nil

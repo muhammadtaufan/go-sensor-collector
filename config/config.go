@@ -14,6 +14,8 @@ type Config struct {
 	DATABASE_USERNAME string
 	DATABASE_PASSWORD string
 	DATABASE_NAME     string
+	API_HOST          string
+	API_PORT          string
 }
 
 func LoadConfig() *Config {
@@ -24,7 +26,9 @@ func LoadConfig() *Config {
 
 	return &Config{
 		GRPC_HOST:         getEnv("GRPC_HOST", "0.0.0.0"),
-		GRPC_PORT:         getEnv("GRPC_PORT", "0.0.0.0"),
+		GRPC_PORT:         getEnv("GRPC_PORT", "50051"),
+		API_HOST:          getEnv("API_HOST", "0.0.0.0"),
+		API_PORT:          getEnv("API_PORT", "3001"),
 		DATABASE_HOST:     getEnv("DATABASE_HOST", "localhost"),
 		DATABASE_USERNAME: getEnv("DATABASE_USERNAME", "mysql"),
 		DATABASE_PASSWORD: getEnv("DATABASE_PASSWORD", "mysql"),

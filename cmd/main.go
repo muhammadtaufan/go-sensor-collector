@@ -26,8 +26,17 @@ func main() {
 
 	usecase := usecase.NewSensorUsecase(repo)
 	grpcDelivery := delivery.NewGRPCDelivery(usecase)
+	errChan := make(chan error)
 
-	if err := grpcDelivery.RunGRPCServer(appConfig); err != nil {
-		log.Fatalf("Failed to run gRPC server: %v", err)
+	go func() {
+		errChan <- grpcDelivery.RunGRPCServer(appConfig)
+	}()
+
+	apiServer := delivery.NewAPIServer(usecase)
+	apiServer.StartServer(appConfig)
+
+	err = <-errChan
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
 }

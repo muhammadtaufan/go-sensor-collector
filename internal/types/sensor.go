@@ -11,3 +11,12 @@ type SensorData struct {
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }
+
+type SensorDataResponse struct {
+	ID          string    `json:"id"`
+	SensorValue float64   `json:"sensor_value"`
+	SensorType  string    `json:"sensor_type"`
+	ID1         string    `json:"id1"`
+	ID2         int       `json:"id2"`
+	CreatedAt   time.Time `json:"created_at"`
+}
