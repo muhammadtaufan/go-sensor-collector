@@ -46,7 +46,7 @@ func (gd *grpcDelivery) RunGRPCServer(cfg *config.Config) error {
 func (gd *grpcDelivery) SendSensorData(ctx context.Context, in *sensorProto.SensorData) (*sensorProto.SensorDataResponse, error) {
 	log.Printf("Received data: %v", in)
 
-	err := gd.usecase.SendSensorData(ctx, &types.SensorData{
+	err := gd.usecase.AddSensorData(ctx, &types.SensorData{
 		ID:          uuid.New().String(),
 		SensorValue: float64(in.SensorValue),
 		SensorType:  in.SensorType,
