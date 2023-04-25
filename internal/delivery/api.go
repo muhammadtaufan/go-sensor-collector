@@ -34,6 +34,18 @@ func NewAPIServer(usecase usecase.SensorSender) *apiServer {
 func (aps *apiServer) GetSensorData(c echo.Context) error {
 	params := c.QueryParams()
 
+	limitStr := params.Get("limit")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	offsetStr := params.Get("offset")
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 1 {
+		offset = 0
+	}
+
 	id1Str := params.Get("id1")
 	id2Str := params.Get("id2")
 
@@ -80,7 +92,7 @@ func (aps *apiServer) GetSensorData(c echo.Context) error {
 		endDate = endDateParsed
 	}
 
-	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate)
+	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate, &limit, &offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Success: false,

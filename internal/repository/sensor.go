@@ -11,7 +11,7 @@ import (
 
 type SensorRepository interface {
 	Add(ctx context.Context, data *types.SensorData) error
-	GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error)
+	GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time, limit, offset *int) ([]types.SensorData, error)
 	DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) error
 	UpdateSensorData(ctx context.Context, id string, data *types.UpdateSensorDataRequest) error
 }
@@ -36,7 +36,7 @@ func (sr *sensorRepository) Add(ctx context.Context, data *types.SensorData) err
 	return nil
 }
 
-func (sr *sensorRepository) GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error) {
+func (sr *sensorRepository) GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time, limit, offset *int) ([]types.SensorData, error) {
 	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE 1`
 	var args []interface{}
 
@@ -59,6 +59,9 @@ func (sr *sensorRepository) GetSensorData(ctx context.Context, id1 *string, id2 
 		query += " AND created_at <= ?"
 		args = append(args, *endDate)
 	}
+
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, *limit, *offset)
 
 	var sensorData []types.SensorData
 	err := sr.db.Select(&sensorData, query, args...)

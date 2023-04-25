@@ -11,7 +11,7 @@ import (
 
 type SensorSender interface {
 	AddSensorData(ctx context.Context, data *types.SensorData) error
-	GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) ([]types.SensorDataResponse, error)
+	GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time, limit, offset *int) ([]types.SensorDataResponse, error)
 	DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) error
 	UpdateSensorData(ctx context.Context, id string, data *types.UpdateSensorDataRequest) error
 }
@@ -34,8 +34,8 @@ func (ss *sensorSender) AddSensorData(ctx context.Context, data *types.SensorDat
 	return nil
 }
 
-func (ss *sensorSender) GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) ([]types.SensorDataResponse, error) {
-	results, err := ss.repo.GetSensorData(ctx, id1, id2, startTime, endTime)
+func (ss *sensorSender) GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time, limit, offset *int) ([]types.SensorDataResponse, error) {
+	results, err := ss.repo.GetSensorData(ctx, id1, id2, startTime, endTime, limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3001/v1/api/sensors?id1=A&id2=3&start_date=2023-04-25 10:00:00&end_date=2023-04-25 13:00:00",
+					"raw": "localhost:3001/v1/api/sensors?id1=A&id2=3&start_date=2023-04-25 10:00:00&end_date=2023-04-25 13:00:00&limit=2&offset=1",
 					"host": [
 						"localhost"
 					],
@@ -38,6 +38,14 @@
 						{
 							"key": "end_date",
 							"value": "2023-04-25 13:00:00"
+						},
+						{
+							"key": "limit",
+							"value": "2"
+						},
+						{
+							"key": "offset",
+							"value": "1"
 						}
 					]
 				}
