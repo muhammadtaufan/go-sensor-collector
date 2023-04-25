@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/muhammadtaufan/go-sensor-collector/internal/types"
@@ -11,6 +12,7 @@ import (
 type SensorRepository interface {
 	Add(ctx context.Context, data *types.SensorData) error
 	GetSensorDataByIDs(ctx context.Context, id1 string, id2 int) ([]types.SensorData, error)
+	GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorData, error)
 }
 
 type sensorRepository struct {
@@ -37,6 +39,17 @@ func (sr *sensorRepository) GetSensorDataByIDs(ctx context.Context, id1 string, 
 	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE id1 = ? AND id2 = ?`
 	var sensorData []types.SensorData
 	err := sr.db.Select(&sensorData, query, id1, id2)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return sensorData, nil
+}
+
+func (sr *sensorRepository) GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorData, error) {
+	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE created_at >= ? AND created_at <= ?`
+	var sensorData []types.SensorData
+	err := sr.db.Select(&sensorData, query, startDate, endDate)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err

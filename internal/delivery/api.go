@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -63,6 +64,55 @@ func (aps *apiServer) GetDataByIDs(c echo.Context) error {
 	})
 }
 
+func (aps *apiServer) GetSensorDataByDate(c echo.Context) error {
+	params := c.QueryParams()
+	startDateStr := params.Get("start_date")
+
+	if startDateStr == "" {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide start_date",
+		})
+	}
+
+	startDate, err := time.Parse("2006-01-02 15:04:05", startDateStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide valid start_date",
+		})
+	}
+
+	endDateStr := params.Get("end_date")
+	if endDateStr == "" {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide end_date",
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02 15:04:05", endDateStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide valid end_date",
+		})
+	}
+
+	data, err := aps.usecase.GetSensorDataByDate(c.Request().Context(), startDate, endDate)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
+			Success: false,
+			Error:   "Opps, something's wrong",
+		})
+	}
+
+	return c.JSON(http.StatusOK, BaseResponse{
+		Success: true,
+		Data:    data,
+	})
+}
+
 func (aps *apiServer) StartServer(cfg *config.Config) error {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -71,6 +121,7 @@ func (aps *apiServer) StartServer(cfg *config.Config) error {
 	v1 := e.Group("v1/api")
 
 	v1.GET("/sensors", aps.GetDataByIDs)
+	v1.GET("/sensors/date", aps.GetSensorDataByDate)
 
 	address := fmt.Sprintf("%s:%s", cfg.API_HOST, cfg.API_PORT)
 	log.Printf("API server is running on %s", address)
