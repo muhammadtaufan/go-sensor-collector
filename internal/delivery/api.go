@@ -82,7 +82,7 @@ func (aps *apiServer) GetSensorData(c echo.Context) error {
 
 	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Success: false,
 			Error:   "Opps, something's wrong",
 		})
@@ -164,6 +164,36 @@ func (aps *apiServer) DeleteSensorData(c echo.Context) error {
 	})
 }
 
+func (aps *apiServer) UpdateSensorData(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide id",
+		})
+	}
+
+	var requestBody types.UpdateSensorDataRequest
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Invalid request body",
+		})
+	}
+
+	err := aps.usecase.UpdateSensorData(c.Request().Context(), id, &requestBody)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Success: false,
+			Error:   "Opps, something's wrong",
+		})
+	}
+
+	return c.JSON(http.StatusOK, BaseResponse{
+		Success: true,
+	})
+}
+
 func (aps *apiServer) StartServer(cfg *config.Config) error {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -173,6 +203,7 @@ func (aps *apiServer) StartServer(cfg *config.Config) error {
 
 	v1.GET("/sensors", aps.GetSensorData)
 	v1.DELETE("/sensors", aps.DeleteSensorData)
+	v1.PATCH("/sensors/:id", aps.UpdateSensorData)
 
 	address := fmt.Sprintf("%s:%s", cfg.API_HOST, cfg.API_PORT)
 	log.Printf("API server is running on %s", address)

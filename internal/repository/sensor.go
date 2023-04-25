@@ -13,6 +13,7 @@ type SensorRepository interface {
 	Add(ctx context.Context, data *types.SensorData) error
 	GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error)
 	DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) error
+	UpdateSensorData(ctx context.Context, id string, data *types.UpdateSensorDataRequest) error
 }
 
 type sensorRepository struct {
@@ -108,4 +109,10 @@ func (sr *sensorRepository) DeleteSensorData(ctx context.Context, id1 *string, i
 		return fmt.Errorf("no record found")
 	}
 	return nil
+}
+
+func (sr *sensorRepository) UpdateSensorData(ctx context.Context, id string, data *types.UpdateSensorDataRequest) error {
+	query := `UPDATE sensor SET sensor_value = COALESCE(?, sensor_value) WHERE id = ?`
+	_, err := sr.db.ExecContext(ctx, query, data.SensorValue, id)
+	return err
 }

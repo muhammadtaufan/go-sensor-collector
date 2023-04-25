@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3001/v1/api/sensors?id1=X&id2=1",
+					"raw": "localhost:3001/v1/api/sensors?id1=A&id2=3&start_date=2023-04-25 10:00:00&end_date=2023-04-25 13:00:00",
 					"host": [
 						"localhost"
 					],
@@ -25,12 +25,85 @@
 					"query": [
 						{
 							"key": "id1",
-							"value": "X"
+							"value": "A"
 						},
 						{
 							"key": "id2",
-							"value": "1"
+							"value": "3"
+						},
+						{
+							"key": "start_date",
+							"value": "2023-04-25 10:00:00"
+						},
+						{
+							"key": "end_date",
+							"value": "2023-04-25 13:00:00"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Sensor Value",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sensor_value\" : 8.0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3001/v1/api/sensors/:id",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"v1",
+						"api",
+						"sensors",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Sensor Data",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id1\": \"A\",\n    \"id2\": \"7\",\n    \"start_date\": \"2023-04-25 10:00:00\",\n    \"end_date\": \"2023-04-25 13:00:00\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3001/v1/api/sensors",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"v1",
+						"api",
+						"sensors"
 					]
 				}
 			},
