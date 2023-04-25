@@ -9,7 +9,8 @@ import (
 )
 
 func InitDatabase(cfg *config.Config) (*sqlx.DB, error) {
-	dsnConn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", cfg.DATABASE_USERNAME, cfg.DATABASE_PASSWORD, cfg.DATABASE_HOST, cfg.DATABASE_NAME)
+	// dsnConn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", cfg.DATABASE_USERNAME, cfg.DATABASE_PASSWORD, cfg.DATABASE_HOST, cfg.DATABASE_NAME)
+	dsnConn := fmt.Sprintf("%s@tcp(%s)/%s?parseTime=true", cfg.DATABASE_USERNAME, cfg.DATABASE_HOST, cfg.DATABASE_NAME)
 	db, err := sqlx.Open("mysql", dsnConn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open MySQL connection: %w", err)

@@ -12,6 +12,7 @@ import (
 	"github.com/muhammadtaufan/go-sensor-collector/config"
 	"github.com/muhammadtaufan/go-sensor-collector/internal/types"
 	"github.com/muhammadtaufan/go-sensor-collector/internal/usecase"
+	"github.com/muhammadtaufan/go-sensor-collector/pkg"
 )
 
 type apiServer struct {
@@ -30,76 +31,56 @@ func NewAPIServer(usecase usecase.SensorSender) *apiServer {
 	}
 }
 
-func (aps *apiServer) GetDataByIDs(c echo.Context) error {
+func (aps *apiServer) GetSensorData(c echo.Context) error {
 	params := c.QueryParams()
-	id1 := params.Get("id1")
 
-	if id1 == "" {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide id1",
-		})
-	}
-
+	id1Str := params.Get("id1")
 	id2Str := params.Get("id2")
-	if id2Str == "" {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide id2",
-		})
-	}
-	id2, _ := strconv.Atoi(id2Str)
 
-	data, err := aps.usecase.GetDataByIDs(c.Request().Context(), id1, id2)
-	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
-			Success: false,
-			Error:   "Opps, something's wrong",
-		})
+	var id1 *string
+	if id1Str != "" {
+		id1 = &id1Str
 	}
 
-	return c.JSON(http.StatusOK, BaseResponse{
-		Success: true,
-		Data:    data,
-	})
-}
+	var id2 *int
+	if id2Str != "" {
+		id2Int, err := strconv.Atoi(id2Str)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid id2",
+			})
+		}
+		id2 = &id2Int
+	}
 
-func (aps *apiServer) GetSensorDataByDate(c echo.Context) error {
-	params := c.QueryParams()
+	var startDate, endDate *time.Time
+
 	startDateStr := params.Get("start_date")
-
-	if startDateStr == "" {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide start_date",
-		})
-	}
-
-	startDate, err := time.Parse("2006-01-02 15:04:05", startDateStr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide valid start_date",
-		})
+	if startDateStr != "" {
+		startDateParsed, err := pkg.ParseDateWithFallback(startDateStr, "2006-01-02", " 00:00:00")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid start_date",
+			})
+		}
+		startDate = startDateParsed
 	}
 
 	endDateStr := params.Get("end_date")
-	if endDateStr == "" {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide end_date",
-		})
+	if endDateStr != "" {
+		endDateParsed, err := pkg.ParseDateWithFallback(endDateStr, "2006-01-02", " 23:59:59")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid end_date",
+			})
+		}
+		endDate = endDateParsed
 	}
 
-	endDate, err := time.Parse("2006-01-02 15:04:05", endDateStr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, BaseResponse{
-			Success: false,
-			Error:   "Please provide valid end_date",
-		})
-	}
-
-	data, err := aps.usecase.GetSensorDataByDate(c.Request().Context(), startDate, endDate)
+	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
 			Success: false,
@@ -120,8 +101,7 @@ func (aps *apiServer) StartServer(cfg *config.Config) error {
 
 	v1 := e.Group("v1/api")
 
-	v1.GET("/sensors", aps.GetDataByIDs)
-	v1.GET("/sensors/date", aps.GetSensorDataByDate)
+	v1.GET("/sensors", aps.GetSensorData)
 
 	address := fmt.Sprintf("%s:%s", cfg.API_HOST, cfg.API_PORT)
 	log.Printf("API server is running on %s", address)

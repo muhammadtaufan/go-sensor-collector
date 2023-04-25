@@ -11,8 +11,7 @@ import (
 
 type SensorSender interface {
 	AddSensorData(ctx context.Context, data *types.SensorData) error
-	GetDataByIDs(ctx context.Context, id1 string, id2 int) ([]types.SensorDataResponse, error)
-	GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorDataResponse, error)
+	GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) ([]types.SensorDataResponse, error)
 }
 
 type sensorSender struct {
@@ -33,28 +32,8 @@ func (ss *sensorSender) AddSensorData(ctx context.Context, data *types.SensorDat
 	return nil
 }
 
-func (ss *sensorSender) GetDataByIDs(ctx context.Context, id1 string, id2 int) ([]types.SensorDataResponse, error) {
-	results, err := ss.repo.GetSensorDataByIDs(ctx, id1, id2)
-	if err != nil {
-		return nil, err
-	}
-
-	var response []types.SensorDataResponse
-	for _, result := range results {
-		response = append(response, types.SensorDataResponse{
-			ID:          result.ID,
-			SensorValue: result.SensorValue,
-			SensorType:  result.SensorType,
-			ID1:         result.ID1,
-			ID2:         result.ID2,
-			CreatedAt:   result.CreatedAt,
-		})
-	}
-	return response, nil
-}
-
-func (ss *sensorSender) GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorDataResponse, error) {
-	results, err := ss.repo.GetSensorDataByDate(ctx, startDate, endDate)
+func (ss *sensorSender) GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) ([]types.SensorDataResponse, error) {
+	results, err := ss.repo.GetSensorData(ctx, id1, id2, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}

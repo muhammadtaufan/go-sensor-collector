@@ -11,8 +11,7 @@ import (
 
 type SensorRepository interface {
 	Add(ctx context.Context, data *types.SensorData) error
-	GetSensorDataByIDs(ctx context.Context, id1 string, id2 int) ([]types.SensorData, error)
-	GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorData, error)
+	GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error)
 }
 
 type sensorRepository struct {
@@ -35,21 +34,32 @@ func (sr *sensorRepository) Add(ctx context.Context, data *types.SensorData) err
 	return nil
 }
 
-func (sr *sensorRepository) GetSensorDataByIDs(ctx context.Context, id1 string, id2 int) ([]types.SensorData, error) {
-	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE id1 = ? AND id2 = ?`
-	var sensorData []types.SensorData
-	err := sr.db.Select(&sensorData, query, id1, id2)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	return sensorData, nil
-}
+func (sr *sensorRepository) GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error) {
+	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE 1`
+	var args []interface{}
 
-func (sr *sensorRepository) GetSensorDataByDate(ctx context.Context, startDate, endDate time.Time) ([]types.SensorData, error) {
-	query := `SELECT id, sensor_value, sensor_type, id1, id2, created_at from sensor WHERE created_at >= ? AND created_at <= ?`
+	if id1 != nil {
+		query += " AND id1 = ?"
+		args = append(args, *id1)
+	}
+
+	if id2 != nil {
+		query += " AND id2 = ?"
+		args = append(args, *id2)
+	}
+
+	if startDate != nil {
+		query += " AND created_at >= ?"
+		args = append(args, *startDate)
+	}
+
+	if endDate != nil {
+		query += " AND created_at <= ?"
+		args = append(args, *endDate)
+	}
+
 	var sensorData []types.SensorData
-	err := sr.db.Select(&sensorData, query, startDate, endDate)
+	err := sr.db.Select(&sensorData, query, args...)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
