@@ -20,3 +20,10 @@ type SensorDataResponse struct {
 	ID2         int       `json:"id2"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type SensorDataRequest struct {
+	ID1       string `json:"id1"`
+	ID2       string `json:"id2"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+}

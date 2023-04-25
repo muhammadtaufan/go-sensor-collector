@@ -94,6 +94,76 @@ func (aps *apiServer) GetSensorData(c echo.Context) error {
 	})
 }
 
+func (aps *apiServer) DeleteSensorData(c echo.Context) error {
+	var requestBody types.SensorDataRequest
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Invalid request body",
+		})
+	}
+
+	var id1 *string
+	if requestBody.ID1 != "" {
+		id1 = &requestBody.ID1
+	}
+
+	var id2 *int
+	if requestBody.ID2 != "" {
+		id2Int, err := strconv.Atoi(requestBody.ID2)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid id2",
+			})
+		}
+		id2 = &id2Int
+	}
+
+	var startDate, endDate *time.Time
+
+	if requestBody.StartDate != "" {
+		startDateParsed, err := pkg.ParseDateWithFallback(requestBody.StartDate, "2006-01-02", " 00:00:00")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid start_date",
+			})
+		}
+		startDate = startDateParsed
+	}
+
+	if requestBody.EndDate != "" {
+		endDateParsed, err := pkg.ParseDateWithFallback(requestBody.EndDate, "2006-01-02", " 23:59:59")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, BaseResponse{
+				Success: false,
+				Error:   "Please provide valid end_date",
+			})
+		}
+		endDate = endDateParsed
+	}
+
+	if id1 == nil && id2 == nil && startDate == nil && endDate == nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Please provide valid request",
+		})
+	}
+
+	err := aps.usecase.DeleteSensorData(c.Request().Context(), id1, id2, startDate, endDate)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
+			Success: false,
+			Error:   "Opps, something's wrong",
+		})
+	}
+
+	return c.JSON(http.StatusOK, BaseResponse{
+		Success: true,
+	})
+}
+
 func (aps *apiServer) StartServer(cfg *config.Config) error {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -102,6 +172,7 @@ func (aps *apiServer) StartServer(cfg *config.Config) error {
 	v1 := e.Group("v1/api")
 
 	v1.GET("/sensors", aps.GetSensorData)
+	v1.DELETE("/sensors", aps.DeleteSensorData)
 
 	address := fmt.Sprintf("%s:%s", cfg.API_HOST, cfg.API_PORT)
 	log.Printf("API server is running on %s", address)

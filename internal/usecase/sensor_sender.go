@@ -12,6 +12,7 @@ import (
 type SensorSender interface {
 	AddSensorData(ctx context.Context, data *types.SensorData) error
 	GetSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) ([]types.SensorDataResponse, error)
+	DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) error
 }
 
 type sensorSender struct {
@@ -50,4 +51,13 @@ func (ss *sensorSender) GetSensorData(ctx context.Context, id1 *string, id2 *int
 		})
 	}
 	return response, nil
+}
+
+func (ss *sensorSender) DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startTime, endTime *time.Time) error {
+	err := ss.repo.DeleteSensorData(ctx, id1, id2, startTime, endTime)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

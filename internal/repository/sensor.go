@@ -12,6 +12,7 @@ import (
 type SensorRepository interface {
 	Add(ctx context.Context, data *types.SensorData) error
 	GetSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) ([]types.SensorData, error)
+	DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) error
 }
 
 type sensorRepository struct {
@@ -65,4 +66,46 @@ func (sr *sensorRepository) GetSensorData(ctx context.Context, id1 *string, id2 
 		return nil, err
 	}
 	return sensorData, nil
+}
+
+func (sr *sensorRepository) DeleteSensorData(ctx context.Context, id1 *string, id2 *int, startDate, endDate *time.Time) error {
+	query := `Delete from sensor WHERE 1`
+	var args []interface{}
+
+	if id1 != nil {
+		query += " AND id1 = ?"
+		args = append(args, *id1)
+	}
+
+	if id2 != nil {
+		query += " AND id2 = ?"
+		args = append(args, *id2)
+	}
+
+	if startDate != nil {
+		query += " AND created_at >= ?"
+		args = append(args, *startDate)
+	}
+
+	if endDate != nil {
+		query += " AND created_at <= ?"
+		args = append(args, *endDate)
+	}
+
+	result, err := sr.db.Exec(query, args...)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if affectedRows == 0 {
+		return fmt.Errorf("no record found")
+	}
+	return nil
 }
