@@ -3,6 +3,8 @@ package pkg
 import (
 	"fmt"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func ParseDateWithFallback(dateStr, fallbackFormat, defaultTime, timezone string) (*time.Time, error) {
@@ -25,4 +27,13 @@ func ParseDateWithFallback(dateStr, fallbackFormat, defaultTime, timezone string
 	}
 
 	return nil, fmt.Errorf("invalid date format")
+}
+
+func ValidateHashPassword(dbPassword, requestPassword string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(dbPassword), []byte(requestPassword))
+	if err != nil {
+		return false, fmt.Errorf("invalid password")
+	}
+
+	return true, nil
 }

@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/muhammadtaufan/go-sensor-collector/config"
@@ -16,8 +18,9 @@ import (
 )
 
 type apiServer struct {
-	usecase usecase.SensorSender
-	cfg     *config.Config
+	sensorUsecase usecase.SensorSender
+	userUsecase   usecase.User
+	cfg           *config.Config
 }
 
 type BaseResponse struct {
@@ -26,10 +29,11 @@ type BaseResponse struct {
 	Error   string                     `json:"error,omitempty"`
 }
 
-func NewAPIServer(usecase usecase.SensorSender, cfg *config.Config) *apiServer {
+func NewAPIServer(sensorUsecase usecase.SensorSender, userUsecase usecase.User, cfg *config.Config) *apiServer {
 	return &apiServer{
-		usecase: usecase,
-		cfg:     cfg,
+		sensorUsecase: sensorUsecase,
+		userUsecase:   userUsecase,
+		cfg:           cfg,
 	}
 }
 
@@ -96,7 +100,7 @@ func (aps *apiServer) GetSensorData(c echo.Context) error {
 		endDate = &startDateParsedUTC
 	}
 
-	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate, &limit, &offset)
+	data, err := aps.sensorUsecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate, &limit, &offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Success: false,
@@ -167,7 +171,7 @@ func (aps *apiServer) DeleteSensorData(c echo.Context) error {
 		})
 	}
 
-	err := aps.usecase.DeleteSensorData(c.Request().Context(), id1, id2, startDate, endDate)
+	err := aps.sensorUsecase.DeleteSensorData(c.Request().Context(), id1, id2, startDate, endDate)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, BaseResponse{
 			Success: false,
@@ -197,7 +201,7 @@ func (aps *apiServer) UpdateSensorData(c echo.Context) error {
 		})
 	}
 
-	err := aps.usecase.UpdateSensorData(c.Request().Context(), id, &requestBody)
+	err := aps.sensorUsecase.UpdateSensorData(c.Request().Context(), id, &requestBody)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, BaseResponse{
 			Success: false,
@@ -210,12 +214,57 @@ func (aps *apiServer) UpdateSensorData(c echo.Context) error {
 	})
 }
 
+func (aps *apiServer) Login(c echo.Context) error {
+	var userRequest types.UserRequest
+	if err := c.Bind(&userRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Invalid request body",
+		})
+	}
+
+	user, err := aps.userUsecase.GetUser(c.Request().Context(), userRequest.Username)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, BaseResponse{
+			Success: false,
+			Error:   "Opps, something's wrong",
+		})
+	}
+
+	isValidPassword, err := pkg.ValidateHashPassword(user.Password, userRequest.Password)
+	if err != nil || !isValidPassword {
+		return c.JSON(http.StatusBadRequest, BaseResponse{
+			Success: false,
+			Error:   "Invalid Password",
+		})
+	}
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["id"] = user.ID
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	tokenString, err := token.SignedString([]byte("SECRET_SENSOR"))
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"token": tokenString,
+	})
+}
+
 func (aps *apiServer) StartServer(cfg *config.Config) error {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	v1 := e.Group("v1/api")
+	v1.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte("SECRET_SENSOR"),
+	}))
+
+	e.POST("/login", aps.Login)
 
 	v1.GET("/sensors", aps.GetSensorData)
 	v1.DELETE("/sensors", aps.DeleteSensorData)

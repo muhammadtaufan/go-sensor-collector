@@ -10,7 +10,13 @@
 			"name": "Get Data By Sensor IDs",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODI3MzU0NTgsImlkIjoiMTVmY2Y2YjQtZTNkMy0xMWVkLTllZmYtNjFmYWMzZTIyMzA4In0.XhmQu8zh_nIYNRy2wvUPLTvv_bthsORfTUWNOFc71zc",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "localhost:3001/v1/api/sensors?id1=A&id2=3&start_date=2023-04-25 10:00:00&end_date=2023-04-25 13:00:00&limit=2&offset=1",
 					"host": [
@@ -56,7 +62,13 @@
 			"name": "Update Sensor Value",
 			"request": {
 				"method": "PATCH",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODI3MzU0NTgsImlkIjoiMTVmY2Y2YjQtZTNkMy0xMWVkLTllZmYtNjFmYWMzZTIyMzA4In0.XhmQu8zh_nIYNRy2wvUPLTvv_bthsORfTUWNOFc71zc",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"sensor_value\" : 8.0\n}",
@@ -92,7 +104,13 @@
 			"name": "Delete Sensor Data",
 			"request": {
 				"method": "DELETE",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODI3MzU0NTgsImlkIjoiMTVmY2Y2YjQtZTNkMy0xMWVkLTllZmYtNjFmYWMzZTIyMzA4In0.XhmQu8zh_nIYNRy2wvUPLTvv_bthsORfTUWNOFc71zc",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"id1\": \"A\",\n    \"id2\": \"7\",\n    \"start_date\": \"2023-04-25 10:00:00\",\n    \"end_date\": \"2023-04-25 13:00:00\"\n}",
@@ -112,6 +130,40 @@
 						"v1",
 						"api",
 						"sensors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3001/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"login"
 					]
 				}
 			},

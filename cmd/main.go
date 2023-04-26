@@ -19,20 +19,26 @@ func main() {
 	}
 	defer db.Close()
 
-	repo, err := repository.NewSensorRepository(db)
+	sensorRepo, err := repository.NewSensorRepository(db)
 	if err != nil {
 		log.Fatalf("Failed to initialize sensor repository: %v", err)
 	}
 
-	usecase := usecase.NewSensorUsecase(repo)
-	grpcDelivery := delivery.NewGRPCDelivery(usecase)
+	userRepo, err := repository.NewUserRepository(db)
+	if err != nil {
+		log.Fatalf("Failed to initialize sensor repository: %v", err)
+	}
+
+	sensorUsecase := usecase.NewSensorUsecase(sensorRepo)
+	userUsecase := usecase.NewUserUsecase(userRepo)
+	grpcDelivery := delivery.NewGRPCDelivery(sensorUsecase)
 	errChan := make(chan error)
 
 	go func() {
 		errChan <- grpcDelivery.RunGRPCServer(appConfig)
 	}()
 
-	apiServer := delivery.NewAPIServer(usecase, appConfig)
+	apiServer := delivery.NewAPIServer(sensorUsecase, userUsecase, appConfig)
 	apiServer.StartServer(appConfig)
 
 	err = <-errChan
