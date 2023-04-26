@@ -37,12 +37,19 @@ make setup
 make migrate-up
 ```
 
-- create a new migration
+5. add dummy user:
+
+```sh
+make create-user
+```
+
+6. create a new migration
+
 ```sh
 make migrate-create name=create_new_table
 ```
 
-5. build and run the service:
+7. build and run the service:
 
 ```sh
 make run

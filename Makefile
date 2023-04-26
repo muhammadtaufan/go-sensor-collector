@@ -8,7 +8,8 @@ run: build
 	./bin/go-sensor-collector
 
 # migration cmd
-MYSQL_DSN=root:@tcp(localhost:3306)/
+MYSQL_USERNAME=root
+MYSQL_DSN=$(MYSQL_USERNAME):@tcp(localhost:3306)/
 DATABASE_NAME=sensor_collector
 
 migrate-up:
@@ -24,5 +25,8 @@ migrate-down:
 migrate-create:
 	@echo "Creating new database migration..."
 	@migrate create -ext sql -tz utc -dir migration $(name) -database "mysql://$(MYSQL_DSN)$(DATABASE_NAME)?parseTime=true"
+
+create-user:
+	mysql -u $(MYSQL_USERNAME) -p $(DATABASE_NAME) < scripts/dummy_user.sql
 
 .PHONY: proto
