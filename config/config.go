@@ -16,6 +16,7 @@ type Config struct {
 	DATABASE_NAME     string
 	API_HOST          string
 	API_PORT          string
+	TIMEZONE          string
 }
 
 func LoadConfig() *Config {
@@ -33,6 +34,7 @@ func LoadConfig() *Config {
 		DATABASE_USERNAME: getEnv("DATABASE_USERNAME", "mysql"),
 		DATABASE_PASSWORD: getEnv("DATABASE_PASSWORD", "mysql"),
 		DATABASE_NAME:     getEnv("DATABASE_NAME", "sensor_collector"),
+		TIMEZONE:          getEnv("TIMEZONE", "Asia/Jakarta"),
 	}
 }
 

@@ -17,6 +17,7 @@ import (
 
 type apiServer struct {
 	usecase usecase.SensorSender
+	cfg     *config.Config
 }
 
 type BaseResponse struct {
@@ -25,9 +26,10 @@ type BaseResponse struct {
 	Error   string                     `json:"error,omitempty"`
 }
 
-func NewAPIServer(usecase usecase.SensorSender) *apiServer {
+func NewAPIServer(usecase usecase.SensorSender, cfg *config.Config) *apiServer {
 	return &apiServer{
 		usecase: usecase,
+		cfg:     cfg,
 	}
 }
 
@@ -70,26 +72,28 @@ func (aps *apiServer) GetSensorData(c echo.Context) error {
 
 	startDateStr := params.Get("start_date")
 	if startDateStr != "" {
-		startDateParsed, err := pkg.ParseDateWithFallback(startDateStr, "2006-01-02", " 00:00:00")
+		startDateParsed, err := pkg.ParseDateWithFallback(startDateStr, "2006-01-02", " 00:00:00", aps.cfg.TIMEZONE)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, BaseResponse{
 				Success: false,
 				Error:   "Please provide valid start_date",
 			})
 		}
-		startDate = startDateParsed
+		startDateParsedUTC := startDateParsed.UTC()
+		startDate = &startDateParsedUTC
 	}
 
 	endDateStr := params.Get("end_date")
 	if endDateStr != "" {
-		endDateParsed, err := pkg.ParseDateWithFallback(endDateStr, "2006-01-02", " 23:59:59")
+		endDateParsed, err := pkg.ParseDateWithFallback(endDateStr, "2006-01-02", " 23:59:59", aps.cfg.TIMEZONE)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, BaseResponse{
 				Success: false,
 				Error:   "Please provide valid end_date",
 			})
 		}
-		endDate = endDateParsed
+		startDateParsedUTC := endDateParsed.UTC()
+		endDate = &startDateParsedUTC
 	}
 
 	data, err := aps.usecase.GetSensorData(c.Request().Context(), id1, id2, startDate, endDate, &limit, &offset)
@@ -135,7 +139,7 @@ func (aps *apiServer) DeleteSensorData(c echo.Context) error {
 	var startDate, endDate *time.Time
 
 	if requestBody.StartDate != "" {
-		startDateParsed, err := pkg.ParseDateWithFallback(requestBody.StartDate, "2006-01-02", " 00:00:00")
+		startDateParsed, err := pkg.ParseDateWithFallback(requestBody.StartDate, "2006-01-02", " 00:00:00", aps.cfg.TIMEZONE)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, BaseResponse{
 				Success: false,
@@ -146,7 +150,7 @@ func (aps *apiServer) DeleteSensorData(c echo.Context) error {
 	}
 
 	if requestBody.EndDate != "" {
-		endDateParsed, err := pkg.ParseDateWithFallback(requestBody.EndDate, "2006-01-02", " 23:59:59")
+		endDateParsed, err := pkg.ParseDateWithFallback(requestBody.EndDate, "2006-01-02", " 23:59:59", aps.cfg.TIMEZONE)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, BaseResponse{
 				Success: false,

@@ -32,7 +32,7 @@ func main() {
 		errChan <- grpcDelivery.RunGRPCServer(appConfig)
 	}()
 
-	apiServer := delivery.NewAPIServer(usecase)
+	apiServer := delivery.NewAPIServer(usecase, appConfig)
 	apiServer.StartServer(appConfig)
 
 	err = <-errChan
