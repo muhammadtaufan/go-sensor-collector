@@ -54,3 +54,32 @@ make migrate-create name=create_new_table
 ```sh
 make run
 ```
+
+
+### Setting up GoSensor Collector with Docker Compose/Swarm
+
+This guide will help you set up GoSensor Collector, with Docker Compose or Docker Swarm.
+
+Prerequisites
+Before proceeding, make sure you have Docker installed on your system. You can download it from the official Docker website: https://www.docker.com/products/docker-desktop
+
+##### Building the Docker image
+
+```sh
+docker build -t gosensor-collector:latest .
+```
+
+##### Using Docker Swarm
+To run GoSensor Collector with Docker Swarm, use the following steps:
+
+Create a network for GoSensor so we can connect with GoSensor Collector:
+
+```sh
+docker network create --driver overlay --scope swarm --attachable gosensor_network
+```
+
+Deploy the GoSensor Collector service:
+
+```sh
+docker stack deploy -c docker-compose.yml gosensor-collector
+```
