@@ -2,6 +2,9 @@
 
 A simple golang backend that act as a gRPC server and REST API, that collect sensor data from sensor gRPC client then serving it as REST API.
 
+### Architecture
+![GoSensor](/docs/gosensor.png "GoSensor")
+
 ## Getting Started
 
 How to setup in local machine

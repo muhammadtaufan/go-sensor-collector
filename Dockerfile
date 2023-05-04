@@ -12,7 +12,10 @@ WORKDIR /root/
 COPY --from=builder /app/main .
 COPY --from=builder /app/.env .
 
-EXPOSE 3000
+# Install tzdata
+RUN apk add --no-cache tzdata
+
+EXPOSE 4001
 EXPOSE 50051
 
 CMD ["./main"]

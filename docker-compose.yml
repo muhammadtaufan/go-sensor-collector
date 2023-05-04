@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   gosensor-collector:
-    image: 0.0.0.0:5001/gosensor-collector
+    image: gosensor-collector:latest
     ports:
       - "${API_PORT:-4001}:4001"
       - "${GRPC_PORT:-50051}:50051"
